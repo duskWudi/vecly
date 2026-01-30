@@ -23,7 +23,7 @@ class Column:
         x : list, np.ndarray, or Vector
             The data for the column.
         """
-        self.vec = Vector(x)
+        self.vec = x if isinstance(x, Vector) else Vector(x)
         self.name = name
 
     def len(self):
@@ -46,7 +46,7 @@ class Column:
         float
             Sum of the column's elements.
         """
-        return np.sum(self.vec)
+        return np.sum(self.vec.data)
 
     def shift(self, n=1):
         """
@@ -62,7 +62,7 @@ class Column:
         np.ndarray
             Shifted data as a NumPy array.
         """
-        return np.concatenate(([np.nan] * n, self.vec[:-n]))
+        return self.vec.shift(n)
 
     def div(self, y) -> np.ndarray:
         """
@@ -91,7 +91,7 @@ class Column:
         np.ndarray
             Element-wise natural logarithm of the column.
         """
-        return np.log(self.vec)
+        return self.vec.log()
 
     def __truediv__(self, other) -> np.ndarray:
         """
@@ -108,6 +108,10 @@ class Column:
             Element-wise division result.
         """
         return self.div(other)
+
+    def to_numpy(self) -> np.ndarray:
+        """Return the underlying NumPy array for this column."""
+        return self.vec.data
 
     def __repr__(self):
         """

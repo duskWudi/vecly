@@ -31,6 +31,48 @@ class Vector:
         """Initialize the vector with the given data."""
         self.data = np.array(data)
 
+    def __array__(self, dtype=None):
+        """
+        NumPy interop hook.
+
+        This allows `np.asarray(Vector(...))`, NumPy ufuncs (e.g. `np.log(v)`),
+        and functions like `np.column_stack([v1, v2])` to work naturally.
+        """
+        if dtype is None:
+            return self.data
+        return self.data.astype(dtype, copy=False)
+
+    def to_numpy(self) -> np.ndarray:
+        """Return the underlying NumPy array."""
+        return self.data
+
+    def log(self) -> "Vector":
+        """Elementwise natural log."""
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return Vector(np.log(self.data))
+
+    def shift(self, n: int = 1, *, fill_value=np.nan) -> "Vector":
+        """
+        Shift values downward by n, filling the first n with fill_value.
+
+        Notes
+        -----
+        - Only supports non-negative n.
+        - If fill_value is NaN, the result will be float dtype.
+        """
+        if n < 0:
+            raise ValueError("shift() only supports non-negative n.")
+        if n == 0:
+            return Vector(self.data.copy())
+        fill_is_nan = isinstance(fill_value, float) and np.isnan(fill_value)
+        if n >= len(self.data):
+            return Vector(np.full(len(self.data), fill_value, dtype=float if fill_is_nan else None))
+        tail = self.data[:-n]
+        if fill_is_nan:
+            tail = tail.astype(float, copy=False)
+        head = np.full(n, fill_value, dtype=float if fill_is_nan else None)
+        return Vector(np.concatenate([head, tail]))
+
     # ---------------------------------------------------------------------
     # Basic arithmetic methods
     # ---------------------------------------------------------------------
