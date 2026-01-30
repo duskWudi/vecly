@@ -1,6 +1,6 @@
 # vecly
 
-Lightweight, NumPy-backed building blocks for quick research workflows.
+Lightweight, NumPy-backed building blocks for quick finance/research workflows.
 
 `vecly` provides three small primitives:
 
